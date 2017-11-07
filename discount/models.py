@@ -1,17 +1,15 @@
 from datetime import datetime
 
+from django.apps import apps
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 from django.core.exceptions import ValidationError
 
-from polymorphic.model import (
-        PolymorphicModel,
-        PolymorphicModelBase,
-        )
+from polymorphic.models import PolymorphicModel
+from polymorphic.base import PolymorphicModelBase
 
-from shop.util.loader import get_model_string
-from shop.models.productmodel import Product
-from shop.cart.cart_modifiers_base import BaseCartModifier
+from shop.modifiers.base import BaseCartModifier
 
 from .managers import DiscountBaseManager
 
@@ -74,7 +72,7 @@ class DiscountBase(PolymorphicModel, BaseCartModifier):
         Subclasses can override this method to filter products further,
         ie by category or exclude products that are on sale.
         """
-        return Product.objects.all()
+        return apps.get_model('Product').objects.all()
 
     def eligible_products(self, in_products=None):
        """
@@ -119,7 +117,8 @@ class CartDiscountCode(models.Model):
     """
     Model holds entered discount code for ``Cart``.
     """
-    cart = models.ForeignKey(get_model_string('Cart'), editable=False)
+    cart = models.ForeignKey(apps.app_configs[settings.SHOP_APP_LABEL].get_model('Cart'), editable=False)
+    #cart = models.ForeignKey(Cart, editable=False)
     code = models.CharField(_('Discount code'), max_length=30)
 
     class Meta:
