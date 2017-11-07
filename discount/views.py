@@ -3,9 +3,7 @@ from django.views.generic import View
 from django.shortcuts import redirect
 from django.core.urlresolvers import reverse_lazy
 
-from shop.util.cart import get_or_create_cart
-
-from models import CartDiscountCode
+from .models import CartDiscountCode
 
 
 # TODO: handle ajax
@@ -17,7 +15,7 @@ class CartDiscountCodeCreateView(CreateView):
 
     def get_form_kwargs(self):
         kwargs = super(CartDiscountCodeCreateView, self).get_form_kwargs()
-        cart = get_or_create_cart(self.request, True)
+        cart = CartModel.objects.get_or_create_from_request(self.request)
         instance = CartDiscountCode(cart=cart)
         kwargs.update({'instance': instance})
         return kwargs
